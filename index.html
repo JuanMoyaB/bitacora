@@ -175,7 +175,7 @@ textarea::placeholder{color:var(--hint)}
   <div class="topbar">
     <div>
       <h1>Bitácora AquaTem</h1>
-      <p>Astillero Cheted · Quellón</p>
+      <p>Astillero Cheted · Quellón · v2.1</p>
     </div>
     <div class="topbar-right">
       <div class="sync-wrap">
@@ -423,37 +423,58 @@ function desconectarDrive() {
 }
 
 // Pedir token con Google Identity Services
+let _googleEsperas = 0;
 function pedirToken(clientId, silencioso) {
-  if (typeof google === 'undefined') { setTimeout(() => pedirToken(clientId, silencioso), 800); return; }
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: clientId || CLIENT_ID,
-    scope: SCOPES,
-    hint: driveUser || undefined,
-    callback: (resp) => {
-      if (resp.error) {
-        if (silencioso) return; // silencioso falla sin molestar
-        toast('Error al conectar: ' + resp.error);
-        return;
-      }
-      gToken = resp.access_token;
-      // Renovar cada 50 min automáticamente
-      clearInterval(window._tokenRenew);
-      window._tokenRenew = setInterval(() => pedirToken(CLIENT_ID, true), 50 * 60 * 1000);
-      if (!driveUser) {
-        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {headers: {Authorization: 'Bearer ' + gToken}})
-          .then(r => r.json()).then(info => {
-            driveUser = info.email || 'usuario Google';
-            guardarDriveCfg(); mostrarEstadoDrive();
-            toast('✓ Conectado como ' + driveUser);
-            syncDrive();
-          });
-      } else {
-        mostrarEstadoDrive();
-        if (pendingSync || !silencioso) syncDrive();
-      }
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+    if (_googleEsperas++ > 12) { // ~10s máximo
+      if (!silencioso) toast('No se pudo cargar Google. Revisa tu conexión.');
+      setSyncStatus('Sin conexión a Google');
+      return;
     }
-  });
-  client.requestAccessToken({prompt: silencioso ? 'none' : (driveUser ? '' : 'select_account')});
+    setTimeout(() => pedirToken(clientId, silencioso), 800);
+    return;
+  }
+  _googleEsperas = 0;
+  try {
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: clientId || CLIENT_ID,
+      scope: SCOPES,
+      callback: (resp) => {
+        if (resp.error) {
+          console.warn('Token error:', resp);
+          if (silencioso) {
+            // El token silencioso falló: marcamos estado y dejamos que el usuario reconecte tocando el botón
+            setSyncStatus('Toca ↻ para reconectar');
+            return;
+          }
+          toast('Error al conectar: ' + (resp.error_description || resp.error));
+          setSyncStatus('Error al conectar');
+          return;
+        }
+        gToken = resp.access_token;
+        clearInterval(window._tokenRenew);
+        window._tokenRenew = setInterval(() => pedirToken(CLIENT_ID, true), 50 * 60 * 1000);
+        if (!driveUser) {
+          fetch('https://www.googleapis.com/oauth2/v2/userinfo', {headers: {Authorization: 'Bearer ' + gToken}})
+            .then(r => r.json()).then(info => {
+              driveUser = info.email || 'usuario Google';
+              guardarDriveCfg(); mostrarEstadoDrive();
+              toast('✓ Conectado como ' + driveUser);
+              syncDrive();
+            }).catch(() => { mostrarEstadoDrive(); syncDrive(); });
+        } else {
+          mostrarEstadoDrive();
+          syncDrive(); // siempre sincroniza tras renovar token
+        }
+      }
+    });
+    // En silencioso intentamos sin prompt; si falla, no molesta al usuario
+    client.requestAccessToken({prompt: silencioso ? 'none' : (driveUser ? '' : 'consent')});
+  } catch(e) {
+    console.error('initTokenClient error:', e);
+    if (!silencioso) toast('Error al iniciar Google Drive');
+    setSyncStatus('Error');
+  }
 }
 
 function setSyncStatus(msg, syncing = false) {
@@ -462,7 +483,8 @@ function setSyncStatus(msg, syncing = false) {
 }
 
 function scheduleSync() {
-  if (!gToken) return;
+  // Si hay sesión Drive guardada (driveUser), encolamos el cambio aunque aún no haya token
+  if (!driveUser) return;
   pendingSync = true;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => { if (pendingSync) syncDrive(); }, 3000);
@@ -470,8 +492,13 @@ function scheduleSync() {
 
 async function syncDrive() {
   if (!gToken) {
-    if (driveUser) pedirToken(CLIENT_ID, false);
-    else toast('Conecta Google Drive primero');
+    if (driveUser) {
+      // Hay sesión previa pero token no listo: pedir silencioso, dejará pendingSync=true para reintentar
+      pendingSync = true;
+      pedirToken(CLIENT_ID, true);
+    } else {
+      toast('Conecta Google Drive primero');
+    }
     return;
   }
   pendingSync = false;
@@ -497,8 +524,20 @@ async function syncDrive() {
     document.getElementById('tb-cnt').textContent = entries.length + ' registro' + (entries.length !== 1 ? 's' : '');
   } catch(err) {
     console.error('Drive sync error:', err);
-    if (err && err.status === 401) { gToken = null; setSyncStatus('Token expirado'); pedirToken(CLIENT_ID, false); }
-    else setSyncStatus('Error al sincronizar');
+    if (err && (err.status === 401 || err.status === 403)) {
+      gToken = null;
+      pendingSync = true; // ¡importante! reintentar después de renovar
+      setSyncStatus('Renovando sesión…');
+      pedirToken(CLIENT_ID, true);
+    } else if (err && err.status === 404) {
+      // El archivo fue eliminado en Drive: lo recreamos en el siguiente intento
+      driveFileId = null;
+      pendingSync = true;
+      setSyncStatus('Recreando archivo…');
+      setTimeout(() => syncDrive(), 1000);
+    } else {
+      setSyncStatus('Error — toca ↻ para reintentar');
+    }
   }
 }
 
@@ -548,8 +587,9 @@ async function driveReq(url, method, body=null, ct=null) {
   const opts = {method, headers: {Authorization: 'Bearer ' + gToken}};
   if (body) { opts.body = body; opts.headers['Content-Type'] = ct || 'application/json'; }
   const res = await fetch(url, opts);
-  if (res.status === 401) throw {status: 401};
-  if (!res.ok) throw new Error(res.status);
+  if (res.status === 401 || res.status === 403) throw {status: res.status};
+  if (res.status === 404) throw {status: 404};
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   if (res.status === 204) return null;
   return res.json();
 }
@@ -878,12 +918,18 @@ mostrarEstadoDrive();
 
 setInterval(mostrarFecha, 60000);
 
-// Si ya hubo sesión previa, pedir token silencioso al abrir
+// Si ya hubo sesión previa, mostrar estado y pedir token silencioso al abrir
 if (driveUser) {
+  setSyncStatus('Conectando…');
   window.addEventListener('load', () => {
-    setTimeout(() => pedirToken(CLIENT_ID, true), 1000);
+    setTimeout(() => pedirToken(CLIENT_ID, true), 1500);
   });
 }
+
+// Reintento de sincronización si recuperamos conexión a internet
+window.addEventListener('online', () => {
+  if (driveUser && pendingSync) syncDrive();
+});
 
 const hoy = new Date();
 const lun = new Date(hoy); lun.setDate(hoy.getDate() - (hoy.getDay() || 7) + 1);
@@ -898,8 +944,16 @@ document.getElementById('ex-fin').value = dom.toISOString().split('T')[0];
 </script>
 
 <script>
+// Desregistrar service workers viejos y limpiar caché para que aparezcan los cambios.
+// (Si en el futuro se quiere reactivar PWA offline, crear sw.js y reemplazar este bloque
+//  por un registro normal.)
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  }).catch(() => {});
+  if (window.caches && caches.keys) {
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+  }
 }
 </script>
 </body>
