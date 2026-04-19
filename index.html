@@ -6,27 +6,52 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#1b3d5c">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bitácora">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Bitácora AquaTem</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--navy:#1b3d5c;--teal:#1591a8;--red:#c0392b;--light:#e4f4f7;--border:#ccdce8;--bg:#f2f6fa;--txt:#1a2b3c;--muted:#5a7a90;--hint:#8aabb8;--r:12px;--rm:8px}
+:root{--navy:#1b3d5c;--teal:#1591a8;--red:#c0392b;--green:#1a7a4a;--light:#e4f4f7;--border:#ccdce8;--bg:#f2f6fa;--txt:#1a2b3c;--muted:#5a7a90;--hint:#8aabb8;--r:12px;--rm:8px}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);font-size:15px}
 .app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:#fff}
+
+/* TOPBAR */
 .topbar{background:var(--navy);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .topbar h1{font-size:17px;font-weight:700}
 .topbar p{font-size:11px;opacity:.5;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
 .badge{background:rgba(255,255,255,.15);border-radius:99px;padding:4px 12px;font-size:12px;font-weight:600}
+.sync-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.sync-status{font-size:10px;color:rgba(255,255,255,.5);white-space:nowrap}
+.sync-btn{background:none;border:none;color:#fff;cursor:pointer;padding:4px;opacity:.7;display:flex;align-items:center}
+.sync-btn svg{width:18px;height:18px;stroke-width:2;fill:none;stroke:currentColor}
+.sync-btn.syncing svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .view{display:none;padding:16px 16px 32px}.view.on{display:block}
 .bottomnav{display:flex;background:#fff;border-top:1px solid var(--border);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
 .bnav{flex:1;padding:10px 4px 11px;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:10px;font-weight:500;color:var(--hint)}
 .bnav svg{width:22px;height:22px;stroke-width:1.8;fill:none;stroke:currentColor}
 .bnav.on{color:var(--navy)}
+
+/* DRIVE CARD */
+.drive-card{background:var(--light);border:1.5px solid var(--teal);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.drive-card h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.drive-card p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
+.drive-card input{width:100%;border:1.5px solid var(--border);border-radius:var(--rm);padding:10px 12px;font-size:12px;font-family:inherit;color:var(--txt);background:#fff;outline:none;margin-bottom:8px}
+.drive-card input:focus{border-color:var(--teal)}
+.btn-connect{width:100%;padding:12px;border:none;border-radius:var(--rm);background:var(--teal);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.drive-ok{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#d4f0e0;border-radius:var(--rm);font-size:12px;color:var(--green);font-weight:600}
+.drive-ok svg{width:15px;height:15px;stroke-width:2.5;fill:none;stroke:currentColor;flex-shrink:0}
+.btn-disconnect{background:none;border:none;color:var(--hint);font-size:11px;cursor:pointer;padding:0;font-family:inherit;margin-left:auto}
+.setup-steps{background:var(--bg);border:1px solid var(--border);border-radius:var(--rm);padding:12px;margin-bottom:10px}
+.setup-steps p{font-size:12px;color:var(--muted);line-height:1.8}
+.setup-steps a{color:var(--teal);text-decoration:none;font-weight:600}
+.setup-steps code{background:#dde8f0;padding:1px 5px;border-radius:4px;font-size:11px;font-family:monospace}
 
 /* PROYECTO */
 .proj-row{display:flex;gap:8px;margin-bottom:16px}
@@ -63,10 +88,11 @@ textarea::placeholder{color:var(--hint)}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
 .card-img img{width:100%;max-height:220px;object-fit:cover;display:block}
 .card-body{padding:11px 14px 13px}
-.card-top{display:flex;align-items:center;margin-bottom:5px;gap:8px}
-.c-proj{font-size:11px;font-weight:700;color:var(--navy);background:var(--light);padding:3px 9px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
-.c-date{font-size:11px;color:var(--hint);margin-left:auto;white-space:nowrap}
-.c-del{background:none;border:none;color:var(--hint);font-size:20px;cursor:pointer;padding:0 0 0 8px;line-height:1;font-family:inherit}
+.card-top{display:flex;align-items:center;margin-bottom:5px;gap:6px;flex-wrap:nowrap}
+.c-proj{font-size:11px;font-weight:700;color:var(--navy);background:var(--light);padding:3px 9px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42%}
+.c-date{font-size:11px;color:var(--hint);white-space:nowrap;margin-left:auto}
+.c-edit{background:none;border:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;padding:0 4px;line-height:1;font-family:inherit;white-space:nowrap}
+.c-del{background:none;border:none;color:var(--hint);font-size:20px;cursor:pointer;padding:0 2px;line-height:1;font-family:inherit}
 .c-txt{font-size:14px;color:var(--txt);line-height:1.65;margin-top:4px}
 .empty{text-align:center;padding:3.5rem 1rem;color:var(--hint)}
 .empty svg{width:48px;height:48px;stroke-width:1.2;fill:none;stroke:currentColor;margin-bottom:14px;opacity:.3;display:block;margin-left:auto;margin-right:auto}
@@ -116,30 +142,31 @@ textarea::placeholder{color:var(--hint)}
 .m-cancel{border:1px solid var(--border);background:#fff;color:var(--muted)}
 .m-ok{border:none;background:var(--navy);color:#fff}
 
+/* MODAL EDITAR REGISTRO */
+.edit-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:flex-end;justify-content:center}
+.edit-overlay.on{display:flex}
+.edit-sheet{background:#fff;width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:20px 16px 36px;max-height:92vh;overflow-y:auto}
+.edit-sheet h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.edit-sheet h3 button{background:none;border:none;font-size:24px;color:var(--hint);cursor:pointer;padding:0;line-height:1}
+.edit-slbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.edit-proj-sel{width:100%;border:1.5px solid var(--border);border-radius:var(--rm);padding:11px 13px;font-size:14px;font-family:inherit;color:var(--txt);background:#fff;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%235a7a90' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;margin-bottom:14px}
+.edit-proj-sel:focus{border-color:var(--teal)}
+.edit-photo-btn{width:100%;border:2px dashed var(--border);border-radius:var(--r);background:var(--bg);min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;overflow:hidden;position:relative;margin-bottom:10px}
+.edit-photo-btn.has{border-style:solid;padding:0;min-height:160px}
+.edit-photo-btn img{width:100%;height:160px;object-fit:cover;display:block}
+.edit-photo-btn .ph-lbl{font-size:13px;color:var(--hint)}
+.edit-photo-btn .ph-change{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:7px;font-size:11px;padding:4px 10px;cursor:pointer;font-family:inherit}
+.btn-del-photo{width:100%;padding:9px;border:1px solid #f5c0b8;border-radius:var(--rm);background:none;color:var(--red);font-size:12px;cursor:pointer;font-family:inherit;margin-bottom:14px}
+.edit-date-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 13px;background:var(--bg);border-radius:var(--rm);border:1px solid var(--border)}
+.edit-date-row svg{width:15px;height:15px;stroke-width:1.8;fill:none;stroke:var(--hint);flex-shrink:0}
+.edit-date-inp{border:none;background:none;font-size:13px;color:var(--muted);font-family:inherit;outline:none;flex:1}
+.edit-btns{display:flex;gap:8px}
+.btn-edit-cancel{flex:1;padding:13px;border:1.5px solid var(--border);border-radius:var(--rm);background:#fff;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-edit-save{flex:2;padding:13px;border:none;border-radius:var(--rm);background:var(--navy);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+#edit-foto-inp{display:none}
+
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(12px);background:#1a2b3c;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;z-index:9999}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* DRIVE SYNC */
-.sync-btn{background:none;border:none;color:#fff;cursor:pointer;padding:4px;opacity:.7;display:flex;align-items:center}
-.sync-btn svg{width:18px;height:18px;stroke-width:2;fill:none;stroke:currentColor}
-.sync-btn.syncing svg{animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.sync-status{font-size:10px;color:rgba(255,255,255,.5);text-align:right;line-height:1.3;min-height:13px}
-.topbar-right{display:flex;align-items:center;gap:8px}
-/* DRIVE SETUP CARD */
-.drive-card{background:#e4f4f7;border:1.5px solid #1591a8;border-radius:12px;padding:16px;margin-bottom:16px}
-.drive-card h3{font-size:14px;font-weight:700;color:#1b3d5c;margin-bottom:6px}
-.drive-card p{font-size:12px;color:#5a7a90;line-height:1.6;margin-bottom:10px}
-.drive-card input{width:100%;border:1.5px solid #ccdce8;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:#1a2b3c;background:#fff;outline:none;margin-bottom:8px}
-.drive-card input:focus{border-color:#1591a8}
-.btn-connect{width:100%;padding:12px;border:none;border-radius:8px;background:#1591a8;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-.drive-ok{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#d4f0e0;border-radius:8px;font-size:12px;color:#1a8a4a;font-weight:600}
-.drive-ok svg{width:15px;height:15px;stroke-width:2.5;fill:none;stroke:currentColor;flex-shrink:0}
-.btn-disconnect{background:none;border:none;color:#8aabb8;font-size:11px;cursor:pointer;padding:0;font-family:inherit;margin-left:auto}
-.setup-steps{background:#f2f6fa;border:1px solid #ccdce8;border-radius:8px;padding:12px;margin-bottom:10px}
-.setup-steps p{font-size:12px;color:#5a7a90;line-height:1.8}
-.setup-steps a{color:#1591a8;text-decoration:none;font-weight:600}
-.setup-steps code{background:#dde8f0;padding:1px 5px;border-radius:4px;font-size:11px;font-family:monospace}
 </style>
 </head>
 <body>
@@ -147,15 +174,15 @@ textarea::placeholder{color:var(--hint)}
 
   <div class="topbar">
     <div>
-        <h1>Bitácora AquaTem</h1>
-        <p>Astillero Cheted · Quellón</p>
+      <h1>Bitácora AquaTem</h1>
+      <p>Astillero Cheted · Quellón</p>
     </div>
     <div class="topbar-right">
-      <div>
+      <div class="sync-wrap">
         <div class="badge" id="tb-cnt">0 registros</div>
         <div class="sync-status" id="sync-status"></div>
       </div>
-      <button class="sync-btn" id="sync-btn" onclick="syncDrive()" title="Sincronizar con Drive">
+      <button class="sync-btn" id="sync-btn" onclick="syncDrive()" title="Sincronizar">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       </button>
     </div>
@@ -176,28 +203,27 @@ textarea::placeholder{color:var(--hint)}
         </div>
       </div>
 
-
-      <!-- GOOGLE DRIVE SETUP -->
-      <div class="drive-card" id="drive-setup-card">
+      <!-- DRIVE -->
+      <div id="drive-setup-card" class="drive-card">
         <h3>☁ Sincronización con Google Drive</h3>
-        <p>Conecta tu cuenta de Google para que los registros se guarden en la nube y no se pierdan nunca, incluso si cambias de dispositivo.</p>
+        <p>Conecta tu cuenta de Google para que los registros se guarden en la nube y nunca se pierdan.</p>
         <div class="setup-steps">
           <p>
             <strong>1.</strong> Ve a <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a><br>
-            <strong>2.</strong> Crea proyecto → API y servicios → Credenciales<br>
-            <strong>3.</strong> Crea <strong>ID de cliente OAuth 2.0</strong> tipo <strong>Aplicación web</strong><br>
-            <strong>4.</strong> Habilita la <strong>Google Drive API</strong><br>
-            <strong>5.</strong> En "Orígenes autorizados de JavaScript" agrega el origen donde abres este archivo<br>
-            <strong>6.</strong> Pega el Client ID aquí abajo
+            <strong>2.</strong> Proyecto → API y servicios → Credenciales<br>
+            <strong>3.</strong> Crear credencial → <strong>ID de cliente OAuth 2.0</strong> → Aplicación web<br>
+            <strong>4.</strong> Habilitar <strong>Google Drive API</strong><br>
+            <strong>5.</strong> Origen autorizado: <code>https://juanmoyab.github.io</code><br>
+            <strong>6.</strong> URI de redireccionamiento: <code>https://juanmoyab.github.io/bitacora/</code><br>
+            <strong>7.</strong> Pega el Client ID abajo
           </p>
         </div>
-        <input type="text" id="client-id-inp" placeholder="Client ID de Google (...apps.googleusercontent.com)" value="739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com" autocomplete="off">
+        <input type="text" id="client-id-inp" placeholder="Client ID (...apps.googleusercontent.com)" value="739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com">
         <button class="btn-connect" onclick="guardarClientId()">Conectar con Google Drive</button>
       </div>
-
-      <div class="drive-card" id="drive-connected-card" style="display:none">
+      <div id="drive-connected-card" class="drive-card" style="display:none">
         <h3>☁ Google Drive</h3>
-        <div class="drive-ok" id="drive-ok-row">
+        <div class="drive-ok">
           <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
           <span id="drive-user-label">Conectado</span>
           <button class="btn-disconnect" onclick="desconectarDrive()">Desconectar</button>
@@ -260,16 +286,13 @@ textarea::placeholder{color:var(--hint)}
           <div class="w2"><input class="ex-inp" type="text" id="ex-num" placeholder="N° informe" value="002"></div>
         </div>
       </div>
-
       <div class="stats">
         <div class="stat"><div class="n" id="s-tot">0</div><div class="l">Registros</div></div>
         <div class="stat"><div class="n" id="s-foto">0</div><div class="l">Con foto</div></div>
         <div class="stat"><div class="n" id="s-dias">0</div><div class="l">Días activos</div></div>
       </div>
-
       <div class="slbl">Selecciona qué incluir</div>
       <div id="ex-list"></div>
-
       <button class="btn-primary" onclick="copiar()">Copiar resumen para Claude ↗</button>
       <button class="btn-sec" onclick="descargar()">Descargar JSON completo (con fotos)</button>
       <div class="textout" id="textout"></div>
@@ -299,464 +322,584 @@ textarea::placeholder{color:var(--hint)}
 
 <div class="toast" id="toast"></div>
 
-<script>
-const KEY='aquatem_v3';
+<!-- MODAL EDITAR REGISTRO -->
+<div class="edit-overlay" id="edit-overlay" onclick="if(event.target===this)cerrarEdicion()">
+  <div class="edit-sheet">
+    <h3>Editar registro <button onclick="cerrarEdicion()">×</button></h3>
 
-// ════════════════════════════════════════
-//  GOOGLE DRIVE
-// ════════════════════════════════════════
+    <div class="edit-slbl">Proyecto</div>
+    <select class="edit-proj-sel" id="edit-proj-sel"></select>
+
+    <div class="edit-slbl">Foto</div>
+    <div class="edit-photo-btn" id="edit-photo-btn" onclick="document.getElementById('edit-foto-inp').click()">
+      <div class="ph-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <div class="ph-lbl">Toca para cambiar foto</div>
+    </div>
+    <button class="btn-del-photo" id="btn-del-foto" style="display:none" onclick="quitarFotoEdit()">✕ Quitar foto</button>
+    <input type="file" id="edit-foto-inp" accept="image/*" capture="environment" onchange="handleFotoEdit(event)">
+
+    <div class="edit-slbl">Descripción</div>
+    <textarea id="edit-txt" placeholder="Describe lo que ves..." rows="4" style="margin-bottom:14px"></textarea>
+
+    <div class="edit-slbl">Fecha</div>
+    <div class="edit-date-row" style="margin-bottom:18px">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <input class="edit-date-inp" type="date" id="edit-date">
+    </div>
+
+    <div class="edit-btns">
+      <button class="btn-edit-cancel" onclick="cerrarEdicion()">Cancelar</button>
+      <button class="btn-edit-save" onclick="guardarEdicion()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════════
+const KEY = 'aquatem_v3';
 const DRIVE_KEY = 'aquatem_drive_cfg';
-const DRIVE_FILE_NAME = 'bitacora_aquatem_data.json';
+const DRIVE_FILE = 'bitacora_aquatem_data.json';
+const CLIENT_ID = '739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
-let gToken = null, driveFileId = null, driveUser = '', clientId = '';
+
+let entries = [], projects = [], curPhoto = null, feedFiltro = 'all';
+let editandoProj = null;
+let editandoEntry = null, editPhoto = null, editPhotoChanged = false;
+let gToken = null, driveFileId = null, driveUser = '';
 let syncTimer = null, pendingSync = false;
 
-function cargarDriveCfg(){
-  try{const cfg=JSON.parse(localStorage.getItem(DRIVE_KEY)||'{}');clientId=cfg.clientId||'739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com';driveFileId=cfg.fileId||null;driveUser=cfg.user||'';}
-  catch(e){}
+// ═══════════════════════════════════════════
+//  LOCAL STORAGE
+// ═══════════════════════════════════════════
+function cargar() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || '{}');
+    entries = d.entries || [];
+    projects = d.projects || ['Pontón Poseidón 11'];
+  } catch(e) { entries = []; projects = ['Pontón Poseidón 11']; }
 }
-function guardarDriveCfg(){
-  localStorage.setItem(DRIVE_KEY,JSON.stringify({clientId,fileId:driveFileId,user:driveUser}));
+
+function persistir() {
+  localStorage.setItem(KEY, JSON.stringify({entries, projects}));
+  document.getElementById('tb-cnt').textContent = entries.length + ' registro' + (entries.length !== 1 ? 's' : '');
+  scheduleSync();
 }
-function guardarClientId(){
-  const val=document.getElementById('client-id-inp').value.trim();
-  if(!val||!val.includes('.apps.googleusercontent.com')){toast('Pega un Client ID válido');return;}
-  clientId=val;guardarDriveCfg();iniciarAuthDrive();
+
+// ═══════════════════════════════════════════
+//  GOOGLE DRIVE
+// ═══════════════════════════════════════════
+function cargarDriveCfg() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem(DRIVE_KEY) || '{}');
+    driveFileId = cfg.fileId || null;
+    driveUser = cfg.user || '';
+  } catch(e) {}
 }
-function mostrarEstadoDrive(){
-  const ok=!!(clientId&&gToken);
-  document.getElementById('drive-setup-card').style.display=ok?'none':'block';
-  document.getElementById('drive-connected-card').style.display=ok?'block':'none';
-  if(ok&&driveUser)document.getElementById('drive-user-label').textContent='Conectado como '+driveUser;
+
+function guardarDriveCfg() {
+  localStorage.setItem(DRIVE_KEY, JSON.stringify({fileId: driveFileId, user: driveUser}));
 }
-function desconectarDrive(){
-  if(!confirm('¿Desconectar Google Drive? Los datos locales se mantienen.'))return;
-  gToken=null;driveUser='';driveFileId=null;clientId='';
-  localStorage.removeItem(DRIVE_KEY);mostrarEstadoDrive();setSyncStatus('');toast('Drive desconectado');
+
+function guardarClientId() {
+  const val = document.getElementById('client-id-inp').value.trim();
+  if (!val || !val.includes('.apps.googleusercontent.com')) { toast('Client ID inválido'); return; }
+  pedirToken(val, false);
 }
-// Solicita token silenciosamente si ya hubo login previo, o con popup si es primera vez
-function iniciarAuthDrive(){
-  if(!clientId){toast('Ingresa tu Client ID primero');return;}
-  if(typeof google==='undefined'){toast('Cargando Google…');setTimeout(iniciarAuthDrive,1000);return;}
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:clientId,
-    scope:SCOPES,
-    callback:(resp)=>{
-      if(resp.error){toast('Error al conectar: '+resp.error);return;}
-      gToken=resp.access_token;
-      // Renovar automáticamente antes de que expire (cada 45 min)
+
+function mostrarEstadoDrive() {
+  const ok = !!(gToken && driveUser);
+  document.getElementById('drive-setup-card').style.display = ok ? 'none' : 'block';
+  document.getElementById('drive-connected-card').style.display = ok ? 'block' : 'none';
+  if (ok) document.getElementById('drive-user-label').textContent = 'Conectado como ' + driveUser;
+}
+
+function desconectarDrive() {
+  if (!confirm('¿Desconectar Drive? Los datos locales se mantienen.')) return;
+  gToken = null; driveUser = ''; driveFileId = null;
+  localStorage.removeItem(DRIVE_KEY);
+  mostrarEstadoDrive(); setSyncStatus(''); toast('Drive desconectado');
+}
+
+// Pedir token con Google Identity Services
+function pedirToken(clientId, silencioso) {
+  if (typeof google === 'undefined') { setTimeout(() => pedirToken(clientId, silencioso), 800); return; }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: clientId || CLIENT_ID,
+    scope: SCOPES,
+    hint: driveUser || undefined,
+    callback: (resp) => {
+      if (resp.error) {
+        if (silencioso) return; // silencioso falla sin molestar
+        toast('Error al conectar: ' + resp.error);
+        return;
+      }
+      gToken = resp.access_token;
+      // Renovar cada 50 min automáticamente
       clearInterval(window._tokenRenew);
-      window._tokenRenew=setInterval(()=>renovarToken(), 45*60*1000);
-      fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:'Bearer '+gToken}})
-        .then(r=>r.json()).then(info=>{
-          driveUser=info.email||'usuario Google';guardarDriveCfg();mostrarEstadoDrive();
-          toast('✓ Conectado como '+driveUser);syncDrive();
-        }).catch(()=>{mostrarEstadoDrive();syncDrive();});
-    }
-  });
-  // prompt:'none' intenta silencioso; si falla usa popup
-  client.requestAccessToken({prompt: driveUser ? 'none' : 'select_account'});
-}
-function renovarToken(){
-  if(!clientId||!driveUser)return;
-  if(typeof google==='undefined')return;
-  const client=google.accounts.oauth2.initTokenClient({
-    client_id:clientId,
-    scope:SCOPES,
-    hint:driveUser,
-    callback:(resp)=>{
-      if(!resp.error&&resp.access_token){
-        gToken=resp.access_token;
-        setSyncStatus('Drive ✓ renovado');
+      window._tokenRenew = setInterval(() => pedirToken(CLIENT_ID, true), 50 * 60 * 1000);
+      if (!driveUser) {
+        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {headers: {Authorization: 'Bearer ' + gToken}})
+          .then(r => r.json()).then(info => {
+            driveUser = info.email || 'usuario Google';
+            guardarDriveCfg(); mostrarEstadoDrive();
+            toast('✓ Conectado como ' + driveUser);
+            syncDrive();
+          });
+      } else {
+        mostrarEstadoDrive();
+        if (pendingSync || !silencioso) syncDrive();
       }
     }
   });
-  client.requestAccessToken({prompt:'none'});
+  client.requestAccessToken({prompt: silencioso ? 'none' : (driveUser ? '' : 'select_account')});
 }
-function checkAuthCallback(){
-  // Con GIS no hay redirect, siempre retorna false
-  // Pero si hay token guardado en sesión, intentamos renovar silenciosamente
-  return false;
+
+function setSyncStatus(msg, syncing = false) {
+  document.getElementById('sync-status').textContent = msg;
+  document.getElementById('sync-btn').classList.toggle('syncing', syncing);
 }
-function setSyncStatus(msg,syncing=false){
-  document.getElementById('sync-status').textContent=msg;
-  document.getElementById('sync-btn').classList.toggle('syncing',syncing);
+
+function scheduleSync() {
+  if (!gToken) return;
+  pendingSync = true;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => { if (pendingSync) syncDrive(); }, 3000);
 }
-function scheduleSync(){
-  if(!gToken)return;
-  pendingSync=true;clearTimeout(syncTimer);
-  syncTimer=setTimeout(()=>{if(pendingSync)syncDrive();},3000);
-}
-async function syncDrive(){
-  if(!gToken){if(clientId)iniciarAuthDrive();else toast('Conecta Google Drive primero');return;}
-  pendingSync=false;setSyncStatus('Sincronizando…',true);
-  try{
-    if(!driveFileId)driveFileId=await buscarArchivoDrive();
-    const localData={entries,projects,version:Date.now()};
-    if(driveFileId){
-      const driveData=await leerArchivoDrive(driveFileId);
-      const merged=mergeDatos(localData,driveData);
-      entries=merged.entries;projects=merged.projects;
-      localStorage.setItem(KEY,JSON.stringify({entries,projects}));
+
+async function syncDrive() {
+  if (!gToken) {
+    if (driveUser) pedirToken(CLIENT_ID, false);
+    else toast('Conecta Google Drive primero');
+    return;
+  }
+  pendingSync = false;
+  setSyncStatus('Sincronizando…', true);
+  try {
+    if (!driveFileId) driveFileId = await buscarArchivo();
+    const local = {entries, projects, version: Date.now()};
+    if (driveFileId) {
+      const remoto = await leerArchivo(driveFileId);
+      const merged = merge(local, remoto);
+      entries = merged.entries; projects = merged.projects;
+      localStorage.setItem(KEY, JSON.stringify({entries, projects}));
       syncSelects();
-      if(document.getElementById('view-feed').classList.contains('on'))renderFeed();
-      await actualizarArchivoDrive(driveFileId,merged);
+      if (document.getElementById('view-feed').classList.contains('on')) renderFeed();
+      if (document.getElementById('view-projs').classList.contains('on')) renderProjs();
+      await actualizarArchivo(driveFileId, merged);
     } else {
-      driveFileId=await crearArchivoDrive(localData);
+      driveFileId = await crearArchivo(local);
     }
     guardarDriveCfg();
-    const ahora=new Date();
-    setSyncStatus('Drive ✓ '+ahora.getHours().toString().padStart(2,'0')+':'+ahora.getMinutes().toString().padStart(2,'0'));
-    document.getElementById('tb-cnt').textContent=entries.length+' registro'+(entries.length!==1?'s':'');
-  }catch(err){
-    console.error('Drive sync error:',err);
-    if(err&&err.status===401){gToken=null;setSyncStatus('Sesión expirada');mostrarEstadoDrive();}
+    const t = new Date();
+    setSyncStatus('Drive ✓ ' + t.getHours().toString().padStart(2,'0') + ':' + t.getMinutes().toString().padStart(2,'0'));
+    document.getElementById('tb-cnt').textContent = entries.length + ' registro' + (entries.length !== 1 ? 's' : '');
+  } catch(err) {
+    console.error('Drive sync error:', err);
+    if (err && err.status === 401) { gToken = null; setSyncStatus('Token expirado'); pedirToken(CLIENT_ID, false); }
     else setSyncStatus('Error al sincronizar');
   }
 }
-function mergeDatos(local,drive){
-  const all=[...(local.entries||[]),...(drive.entries||[])];
-  const byId={};
-  all.forEach(e=>{if(!byId[e.id])byId[e.id]=e;});
-  const entries=Object.values(byId).sort((a,b)=>b.id-a.id);
-  const projSet=new Set([...(local.projects||[]),...(drive.projects||[])]);
-  return{entries,projects:Array.from(projSet),version:Math.max(local.version||0,drive.version||0)};
+
+function merge(local, drive) {
+  const all = [...(local.entries||[]), ...(drive.entries||[])];
+  const byId = {};
+  all.forEach(e => { if (!byId[e.id]) byId[e.id] = e; });
+  const entries = Object.values(byId).sort((a,b) => b.id - a.id);
+  const projSet = new Set([...(local.projects||[]), ...(drive.projects||[])]);
+  return {entries, projects: Array.from(projSet), version: Math.max(local.version||0, drive.version||0)};
 }
-async function buscarArchivoDrive(){
-  try{
-    const r1=await driveReq(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${DRIVE_FILE_NAME}'&fields=files(id)`,'GET');
-    if(r1.files&&r1.files.length)return r1.files[0].id;
-  }catch(e){}
-  const r2=await driveReq(`https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}' and trashed=false&fields=files(id)`,'GET');
-  if(r2.files&&r2.files.length)return r2.files[0].id;
+
+async function buscarArchivo() {
+  try {
+    const r = await driveReq(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${DRIVE_FILE}'&fields=files(id)`, 'GET');
+    if (r.files && r.files.length) return r.files[0].id;
+  } catch(e) {}
+  try {
+    const r = await driveReq(`https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE}' and trashed=false&fields=files(id)`, 'GET');
+    if (r.files && r.files.length) return r.files[0].id;
+  } catch(e) {}
   return null;
 }
-async function leerArchivoDrive(id){
-  const res=await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`,{headers:{Authorization:'Bearer '+gToken}});
-  if(res.status===401)throw{status:401};
-  if(!res.ok)throw new Error(res.status);
+
+async function leerArchivo(id) {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, {headers: {Authorization: 'Bearer ' + gToken}});
+  if (res.status === 401) throw {status: 401};
+  if (!res.ok) throw new Error(res.status);
   return res.json();
 }
-async function crearArchivoDrive(data){
-  const b='---aquatem---';
-  const body=[`--${b}`,`Content-Type: application/json; charset=UTF-8`,'',JSON.stringify({name:DRIVE_FILE_NAME,parents:['appDataFolder']}),`--${b}`,`Content-Type: application/json; charset=UTF-8`,'',JSON.stringify(data),`--${b}--`].join('\r\n');
-  const r=await driveReq(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`,'POST',body,`multipart/related; boundary="${b}"`);
+
+async function crearArchivo(data) {
+  const b = '---aqbnd---';
+  const body = [`--${b}`, 'Content-Type: application/json; charset=UTF-8', '',
+    JSON.stringify({name: DRIVE_FILE, parents: ['appDataFolder']}),
+    `--${b}`, 'Content-Type: application/json; charset=UTF-8', '',
+    JSON.stringify(data), `--${b}--`].join('\r\n');
+  const r = await driveReq(`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`, 'POST', body, `multipart/related; boundary="${b}"`);
   return r.id;
 }
-async function actualizarArchivoDrive(id,data){
-  await driveReq(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`,'PATCH',JSON.stringify(data),'application/json');
+
+async function actualizarArchivo(id, data) {
+  await driveReq(`https://www.googleapis.com/upload/drive/v3/files/${id}?uploadType=media`, 'PATCH', JSON.stringify(data), 'application/json');
 }
-async function driveReq(url,method,body=null,ct=null){
-  const opts={method,headers:{Authorization:'Bearer '+gToken}};
-  if(body){opts.body=body;opts.headers['Content-Type']=ct||'application/json';}
-  const res=await fetch(url,opts);
-  if(res.status===401)throw{status:401};
-  if(!res.ok)throw new Error(res.status);
-  if(res.status===204)return null;
+
+async function driveReq(url, method, body=null, ct=null) {
+  const opts = {method, headers: {Authorization: 'Bearer ' + gToken}};
+  if (body) { opts.body = body; opts.headers['Content-Type'] = ct || 'application/json'; }
+  const res = await fetch(url, opts);
+  if (res.status === 401) throw {status: 401};
+  if (!res.ok) throw new Error(res.status);
+  if (res.status === 204) return null;
   return res.json();
 }
 
-
-let entries=[], projects=[], curPhoto=null, feedFiltro='all', editandoProj=null, modalMode='nuevo';
-
-function cargar(){
-  try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');entries=d.entries||[];projects=d.projects||['Pontón Poseidón 11'];}
-  catch(e){entries=[];projects=['Pontón Poseidón 11'];}
-}
-function persistir(){
-  localStorage.setItem(KEY,JSON.stringify({entries,projects}));
-  document.getElementById('tb-cnt').textContent=entries.length+' registro'+(entries.length!==1?'s':'');
-  scheduleSync();
-}
-function fd(d){if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;}
-function fechaHoy(){return new Date().toISOString().split('T')[0];}
-function mostrarFecha(){
-  const h=new Date();
-  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('fecha-lbl').textContent=`${dias[h.getDay()]} ${h.getDate()} de ${meses[h.getMonth()]} de ${h.getFullYear()}`;
+// ═══════════════════════════════════════════
+//  UTILIDADES
+// ═══════════════════════════════════════════
+function fd(d) { if(!d)return''; const[y,m,day]=d.split('-'); return`${day}/${m}/${y}`; }
+function fechaHoy() { return new Date().toISOString().split('T')[0]; }
+function mostrarFecha() {
+  const h = new Date();
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('fecha-lbl').textContent = `${dias[h.getDay()]} ${h.getDate()} de ${meses[h.getMonth()]} de ${h.getFullYear()}`;
 }
 
-// ── SYNC SELECTS ──
-function syncSelects(){
-  const opts=projects.map(p=>`<option value="${p}">${p}</option>`).join('');
-  document.getElementById('proj-sel').innerHTML=opts;
-  const ex=document.getElementById('ex-proj');
-  const prev=ex.value;
-  ex.innerHTML=opts;
-  if(prev&&projects.includes(prev))ex.value=prev;
+function comprimirFoto(file, cb) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const MAX = 600; let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; } }
+      else { if (h > MAX) { w = Math.round(w*MAX/h); h = MAX; } }
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(c.toDataURL('image/jpeg', 0.42));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
-// ── MODAL NUEVO / EDITAR ──
-function abrirNuevo(){
-  modalMode='nuevo';
-  document.getElementById('modal-cap-titulo').textContent='Nuevo proyecto';
-  document.getElementById('m-inp').value='';
+// ═══════════════════════════════════════════
+//  SELECTS
+// ═══════════════════════════════════════════
+function syncSelects() {
+  const opts = projects.map(p => `<option value="${p}">${p}</option>`).join('');
+  document.getElementById('proj-sel').innerHTML = opts;
+  const ex = document.getElementById('ex-proj');
+  const prev = ex.value;
+  ex.innerHTML = opts;
+  if (prev && projects.includes(prev)) ex.value = prev;
+}
+
+// ═══════════════════════════════════════════
+//  MODAL NUEVO PROYECTO
+// ═══════════════════════════════════════════
+function abrirNuevo() {
+  document.getElementById('modal-cap-titulo').textContent = 'Nuevo proyecto';
+  document.getElementById('m-inp').value = '';
   document.getElementById('modal-cap').classList.add('on');
-  setTimeout(()=>document.getElementById('m-inp').focus(),80);
+  setTimeout(() => document.getElementById('m-inp').focus(), 80);
 }
-function cerrarModal(id){document.getElementById(id).classList.remove('on');}
-function confirmarModal(){
-  const n=document.getElementById('m-inp').value.trim();
-  if(!n){toast('Escribe un nombre');return;}
-  if(!projects.includes(n)){projects.push(n);persistir();syncSelects();}
-  document.getElementById('proj-sel').value=n;
+function cerrarModal(id) { document.getElementById(id).classList.remove('on'); }
+function confirmarModal() {
+  const n = document.getElementById('m-inp').value.trim();
+  if (!n) { toast('Escribe un nombre'); return; }
+  if (!projects.includes(n)) { projects.push(n); persistir(); syncSelects(); }
+  document.getElementById('proj-sel').value = n;
   cerrarModal('modal-cap');
   toast('Proyecto creado ✓');
-  if(document.getElementById('view-projs').classList.contains('on'))renderProjs();
+  if (document.getElementById('view-projs').classList.contains('on')) renderProjs();
 }
 
-// ── EDITAR PROYECTO ──
-function editarProj(nombre){
-  editandoProj=nombre;
-  document.getElementById('edit-inp').value=nombre;
+// ═══════════════════════════════════════════
+//  EDITAR / ELIMINAR PROYECTO
+// ═══════════════════════════════════════════
+function editarProj(nombre) {
+  editandoProj = nombre;
+  document.getElementById('edit-inp').value = nombre;
   document.getElementById('modal-edit').classList.add('on');
-  setTimeout(()=>document.getElementById('edit-inp').focus(),80);
+  setTimeout(() => document.getElementById('edit-inp').focus(), 80);
 }
-function confirmarEdicion(){
-  const nuevo=document.getElementById('edit-inp').value.trim();
-  if(!nuevo){toast('Escribe un nombre');return;}
-  if(nuevo===editandoProj){cerrarModal('modal-edit');return;}
-  if(projects.includes(nuevo)){toast('Ya existe ese nombre');return;}
-  projects=projects.map(p=>p===editandoProj?nuevo:p);
-  entries=entries.map(e=>e.proj===editandoProj?{...e,proj:nuevo}:e);
-  persistir();syncSelects();
-  cerrarModal('modal-edit');
-  renderProjs();
+function confirmarEdicion() {
+  const nuevo = document.getElementById('edit-inp').value.trim();
+  if (!nuevo) { toast('Escribe un nombre'); return; }
+  if (nuevo === editandoProj) { cerrarModal('modal-edit'); return; }
+  if (projects.includes(nuevo)) { toast('Ya existe ese nombre'); return; }
+  projects = projects.map(p => p === editandoProj ? nuevo : p);
+  entries = entries.map(e => e.proj === editandoProj ? {...e, proj: nuevo} : e);
+  persistir(); syncSelects();
+  cerrarModal('modal-edit'); renderProjs();
   toast('Proyecto renombrado ✓');
 }
-
-// ── ELIMINAR PROYECTO ──
-function eliminarProj(nombre){
-  const cnt=entries.filter(e=>e.proj===nombre).length;
-  const msg=cnt>0
-    ?`¿Eliminar el proyecto "${nombre}"? Tiene ${cnt} registro${cnt!==1?'s':''} que también se eliminarán.`
-    :`¿Eliminar el proyecto "${nombre}"?`;
-  if(!confirm(msg))return;
-  projects=projects.filter(p=>p!==nombre);
-  entries=entries.filter(e=>e.proj!==nombre);
-  persistir();syncSelects();
-  renderProjs();
+function eliminarProj(nombre) {
+  const cnt = entries.filter(e => e.proj === nombre).length;
+  const msg = cnt > 0 ? `¿Eliminar "${nombre}"? Tiene ${cnt} registro${cnt!==1?'s':''} que también se eliminarán.` : `¿Eliminar "${nombre}"?`;
+  if (!confirm(msg)) return;
+  projects = projects.filter(p => p !== nombre);
+  entries = entries.filter(e => e.proj !== nombre);
+  persistir(); syncSelects(); renderProjs();
   toast('Proyecto eliminado');
 }
-
-// ── RENDER PROYECTOS ──
-function renderProjs(){
-  const list=document.getElementById('proj-list');
-  if(!projects.length){
-    list.innerHTML='<div class="empty"><p>Sin proyectos.<br>Crea uno con el botón de abajo.</p></div>';
-    return;
-  }
-  list.innerHTML=projects.map(p=>{
-    const cnt=entries.filter(e=>e.proj===p).length;
-    return`<div class="proj-item">
+function renderProjs() {
+  const list = document.getElementById('proj-list');
+  if (!projects.length) { list.innerHTML = '<div class="empty"><p>Sin proyectos.</p></div>'; return; }
+  list.innerHTML = projects.map(p => {
+    const cnt = entries.filter(e => e.proj === p).length;
+    const ps = p.replace(/'/g, "\\'");
+    return `<div class="proj-item">
       <div class="proj-name">${p}</div>
       <div class="proj-cnt">${cnt} reg.</div>
       <div class="proj-actions">
-        <button class="btn-icon" onclick="editarProj('${p.replace(/'/g,"\\'")}')">Editar</button>
-        <button class="btn-icon danger" onclick="eliminarProj('${p.replace(/'/g,"\\'")}')">Eliminar</button>
+        <button class="btn-icon" onclick="editarProj('${ps}')">Editar</button>
+        <button class="btn-icon danger" onclick="eliminarProj('${ps}')">Eliminar</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── FOTO ──
-function handleFoto(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const c=document.createElement('canvas');
-      const MAX=600;let w=img.width,h=img.height;
-      if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}
-      else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
-      c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      curPhoto=c.toDataURL('image/jpeg',0.42);
-      const btn=document.getElementById('photo-btn');
-      btn.classList.add('has');
-      btn.innerHTML=`<img src="${curPhoto}" alt=""><button class="ph-change" onclick="event.stopPropagation();document.getElementById('foto-inp').click()">Cambiar foto</button>`;
-    };
-    img.src=ev.target.result;
-  };
-  reader.readAsDataURL(file);
+// ═══════════════════════════════════════════
+//  FOTO NUEVO REGISTRO
+// ═══════════════════════════════════════════
+function handleFoto(e) {
+  const file = e.target.files[0]; if (!file) return;
+  comprimirFoto(file, data => {
+    curPhoto = data;
+    const btn = document.getElementById('photo-btn');
+    btn.classList.add('has');
+    btn.innerHTML = `<img src="${curPhoto}" alt=""><button class="ph-change" onclick="event.stopPropagation();document.getElementById('foto-inp').click()">Cambiar foto</button>`;
+  });
 }
 
-// ── GUARDAR REGISTRO ──
-function guardar(){
-  const txt=document.getElementById('cap-txt').value.trim();
-  const proj=document.getElementById('proj-sel').value;
-  if(!proj){toast('Selecciona un proyecto');return;}
-  if(!txt&&!curPhoto){toast('Agrega una foto o una descripción');return;}
-  entries.unshift({id:Date.now(),proj,txt,date:fechaHoy(),photo:curPhoto});
+// ═══════════════════════════════════════════
+//  GUARDAR REGISTRO
+// ═══════════════════════════════════════════
+function guardar() {
+  const txt = document.getElementById('cap-txt').value.trim();
+  const proj = document.getElementById('proj-sel').value;
+  if (!proj) { toast('Selecciona un proyecto'); return; }
+  if (!txt && !curPhoto) { toast('Agrega una foto o descripción'); return; }
+  entries.unshift({id: Date.now(), proj, txt, date: fechaHoy(), photo: curPhoto});
   persistir();
-  document.getElementById('cap-txt').value='';
-  curPhoto=null;
-  document.getElementById('foto-inp').value='';
-  const btn=document.getElementById('photo-btn');
+  document.getElementById('cap-txt').value = '';
+  curPhoto = null;
+  document.getElementById('foto-inp').value = '';
+  const btn = document.getElementById('photo-btn');
   btn.classList.remove('has');
-  btn.innerHTML='<div class="ph-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="ph-lbl">Toca para sacar foto</div>';
+  btn.innerHTML = '<div class="ph-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="ph-lbl">Toca para sacar foto</div>';
   toast('Guardado ✓');
 }
 
-// ── FEED ──
-function renderFeed(){
-  const bar=document.getElementById('filter-bar');
-  bar.innerHTML=['all',...projects].map(p=>`<button class="f-chip${feedFiltro===p?' on':''}" onclick="setFiltro('${p.replace(/'/g,"\\'")}')"> ${p==='all'?'Todos':p}</button>`).join('');
-  const list=document.getElementById('feed-list');
-  const items=feedFiltro==='all'?entries:entries.filter(e=>e.proj===feedFiltro);
-  if(!items.length){
-    list.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><p>Sin registros aún.<br>Ve a <strong>Registrar</strong> para empezar.</p></div>`;
+// ═══════════════════════════════════════════
+//  FEED
+// ═══════════════════════════════════════════
+function renderFeed() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = ['all', ...projects].map(p => {
+    const ps = p.replace(/'/g, "\\'");
+    return `<button class="f-chip${feedFiltro===p?' on':''}" onclick="setFiltro('${ps}')">${p==='all'?'Todos':p}</button>`;
+  }).join('');
+  const list = document.getElementById('feed-list');
+  const items = feedFiltro === 'all' ? entries : entries.filter(e => e.proj === feedFiltro);
+  if (!items.length) {
+    list.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Sin registros aún.<br>Ve a <strong>Registrar</strong> para empezar.</p></div>`;
     return;
   }
-  list.innerHTML=items.map(e=>`
+  list.innerHTML = items.map(e => `
     <div class="card">
-      ${e.photo?`<div class="card-img"><img src="${e.photo}" loading="lazy" alt=""></div>`:''}
+      ${e.photo ? `<div class="card-img"><img src="${e.photo}" loading="lazy" alt=""></div>` : ''}
       <div class="card-body">
         <div class="card-top">
           <span class="c-proj">${e.proj}</span>
           <span class="c-date">${fd(e.date)}</span>
+          <button class="c-edit" onclick="abrirEdicion(${e.id})">Editar</button>
           <button class="c-del" onclick="eliminarEntry(${e.id})">×</button>
         </div>
-        ${e.txt?`<div class="c-txt">${e.txt}</div>`:''}
+        ${e.txt ? `<div class="c-txt">${e.txt}</div>` : ''}
       </div>
     </div>`).join('');
 }
-function setFiltro(p){feedFiltro=p;renderFeed();}
-function eliminarEntry(id){
-  if(!confirm('¿Eliminar este registro?'))return;
-  entries=entries.filter(e=>e.id!==id);
-  persistir();renderFeed();
+function setFiltro(p) { feedFiltro = p; renderFeed(); }
+function eliminarEntry(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  entries = entries.filter(e => e.id !== id);
+  persistir(); renderFeed();
 }
 
-// ── EXPORT ──
-// Bug fix: no filtrar por fecha si el registro no tiene fecha, y mostrar TODOS los del proyecto si no hay rango
-function enRango(){
-  const ini=document.getElementById('ex-ini').value;
-  const fin=document.getElementById('ex-fin').value;
-  const proj=document.getElementById('ex-proj').value;
-  return entries.filter(e=>{
-    if(proj&&e.proj!==proj)return false;
-    // Si hay rango de fechas, filtrar; si no hay rango mostrar todo
-    if(ini&&fin){
-      if(!e.date)return true; // sin fecha siempre incluir
-      return e.date>=ini&&e.date<=fin;
-    }
+// ═══════════════════════════════════════════
+//  EDITAR REGISTRO
+// ═══════════════════════════════════════════
+function abrirEdicion(id) {
+  const e = entries.find(x => x.id === id); if (!e) return;
+  editandoEntry = id; editPhoto = e.photo || null; editPhotoChanged = false;
+  document.getElementById('edit-proj-sel').innerHTML = projects.map(p => `<option value="${p}"${p===e.proj?' selected':''}>${p}</option>`).join('');
+  document.getElementById('edit-txt').value = e.txt || '';
+  document.getElementById('edit-date').value = e.date || '';
+  const btn = document.getElementById('edit-photo-btn');
+  const delBtn = document.getElementById('btn-del-foto');
+  if (e.photo) {
+    btn.classList.add('has');
+    btn.innerHTML = `<img src="${e.photo}" alt=""><button class="ph-change" onclick="event.stopPropagation();document.getElementById('edit-foto-inp').click()">Cambiar foto</button>`;
+    delBtn.style.display = 'block';
+  } else {
+    btn.classList.remove('has');
+    btn.innerHTML = '<div class="ph-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="ph-lbl">Toca para agregar foto</div>';
+    delBtn.style.display = 'none';
+  }
+  document.getElementById('edit-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarEdicion() {
+  document.getElementById('edit-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+  editandoEntry = null; editPhoto = null; editPhotoChanged = false;
+  document.getElementById('edit-foto-inp').value = '';
+}
+function handleFotoEdit(ev) {
+  const file = ev.target.files[0]; if (!file) return;
+  comprimirFoto(file, data => {
+    editPhoto = data; editPhotoChanged = true;
+    const btn = document.getElementById('edit-photo-btn');
+    btn.classList.add('has');
+    btn.innerHTML = `<img src="${editPhoto}" alt=""><button class="ph-change" onclick="event.stopPropagation();document.getElementById('edit-foto-inp').click()">Cambiar foto</button>`;
+    document.getElementById('btn-del-foto').style.display = 'block';
+  });
+}
+function quitarFotoEdit() {
+  editPhoto = null; editPhotoChanged = true;
+  const btn = document.getElementById('edit-photo-btn');
+  btn.classList.remove('has');
+  btn.innerHTML = '<div class="ph-ico"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div class="ph-lbl">Toca para agregar foto</div>';
+  document.getElementById('btn-del-foto').style.display = 'none';
+}
+function guardarEdicion() {
+  const idx = entries.findIndex(x => x.id === editandoEntry); if (idx === -1) return;
+  const txt = document.getElementById('edit-txt').value.trim();
+  const proj = document.getElementById('edit-proj-sel').value;
+  const date = document.getElementById('edit-date').value;
+  if (!txt && !editPhoto && !entries[idx].photo) { toast('Agrega foto o descripción'); return; }
+  entries[idx] = {...entries[idx], proj, txt, date, photo: editPhotoChanged ? editPhoto : entries[idx].photo};
+  persistir(); cerrarEdicion(); renderFeed();
+  toast('Registro actualizado ✓');
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════
+function enRango() {
+  const ini = document.getElementById('ex-ini').value;
+  const fin = document.getElementById('ex-fin').value;
+  const proj = document.getElementById('ex-proj').value;
+  return entries.filter(e => {
+    if (proj && e.proj !== proj) return false;
+    if (ini && fin) { if (!e.date) return true; return e.date >= ini && e.date <= fin; }
     return true;
   });
 }
-function renderExport(){
+function renderExport() {
   syncSelects();
-  const items=enRango();
-  document.getElementById('s-tot').textContent=items.length;
-  document.getElementById('s-foto').textContent=items.filter(e=>e.photo).length;
-  document.getElementById('s-dias').textContent=new Set(items.map(e=>e.date).filter(Boolean)).size;
-  const list=document.getElementById('ex-list');
-  if(!items.length){
-    list.innerHTML='<p style="font-size:13px;color:var(--hint);text-align:center;padding:1rem 0">Sin registros. Verifica el proyecto y el período.</p>';
-    return;
-  }
-  list.innerHTML=items.map(e=>`
+  const items = enRango();
+  document.getElementById('s-tot').textContent = items.length;
+  document.getElementById('s-foto').textContent = items.filter(e => e.photo).length;
+  document.getElementById('s-dias').textContent = new Set(items.map(e => e.date).filter(Boolean)).size;
+  const list = document.getElementById('ex-list');
+  if (!items.length) { list.innerHTML = '<p style="font-size:13px;color:var(--hint);text-align:center;padding:1rem 0">Sin registros en este período.</p>'; return; }
+  list.innerHTML = items.map(e => `
     <div class="ex-item">
       <input type="checkbox" class="ex-chk" id="chk${e.id}" checked>
-      ${e.photo?`<img class="ex-thumb" src="${e.photo}" alt="">`:`<div class="ex-thumb"></div>`}
+      ${e.photo ? `<img class="ex-thumb" src="${e.photo}" alt="">` : `<div class="ex-thumb"></div>`}
       <div class="ex-meta">
         <div class="proj">${e.proj}</div>
-        <div class="desc">${e.txt||'(solo foto)'}</div>
+        <div class="desc">${e.txt || '(solo foto)'}</div>
         <div class="dt">${fd(e.date)}</div>
       </div>
     </div>`).join('');
 }
-function seleccionados(){return enRango().filter(e=>{const c=document.getElementById('chk'+e.id);return c&&c.checked;});}
-
-function copiar(){
-  const sel=seleccionados();
-  if(!sel.length){toast('No hay registros seleccionados');return;}
-  const proj=document.getElementById('ex-proj').value;
-  const ini=document.getElementById('ex-ini').value;
-  const fin=document.getElementById('ex-fin').value;
-  const resp=document.getElementById('ex-resp').value;
-  const num=document.getElementById('ex-num').value;
-  const periodo=ini&&fin?`${fd(ini)} al ${fd(fin)}`:'período no especificado';
-  let txt=`BITÁCORA AQUATEM\n${'═'.repeat(46)}\n`;
-  txt+=`Proyecto: ${proj}\nPeríodo: ${periodo}\nElaborado por: ${resp}\nN° Informe: ${num}\n`;
-  txt+=`Registros: ${sel.length} (${sel.filter(e=>e.photo).length} con foto)\n${'─'.repeat(46)}\n\n`;
-  sel.forEach((e,i)=>{
-    txt+=`${i+1}. ${e.date?fd(e.date):'Sin fecha'}\n`;
-    if(e.txt)txt+=`   ${e.txt}\n`;
-    if(e.photo)txt+=`   [foto adjunta]\n`;
-    txt+='\n';
-  });
-  txt+=`${'═'.repeat(46)}\nGenera el informe N°${num}. Adjunto las fotos por separado.`;
-  navigator.clipboard.writeText(txt).then(()=>toast('Copiado — pégalo en Claude ✓')).catch(()=>{
-    const box=document.getElementById('textout');box.style.display='block';box.textContent=txt;
-    toast('Copia el texto de abajo');
+function seleccionados() { return enRango().filter(e => { const c = document.getElementById('chk' + e.id); return c && c.checked; }); }
+function copiar() {
+  const sel = seleccionados();
+  if (!sel.length) { toast('No hay registros seleccionados'); return; }
+  const proj = document.getElementById('ex-proj').value;
+  const ini = document.getElementById('ex-ini').value;
+  const fin = document.getElementById('ex-fin').value;
+  const resp = document.getElementById('ex-resp').value;
+  const num = document.getElementById('ex-num').value;
+  const periodo = ini && fin ? `${fd(ini)} al ${fd(fin)}` : 'período no especificado';
+  let txt = `BITÁCORA AQUATEM\n${'═'.repeat(46)}\n`;
+  txt += `Proyecto: ${proj}\nPeríodo: ${periodo}\nElaborado por: ${resp}\nN° Informe: ${num}\n`;
+  txt += `Registros: ${sel.length} (${sel.filter(e=>e.photo).length} con foto)\n${'─'.repeat(46)}\n\n`;
+  sel.forEach((e, i) => { txt += `${i+1}. ${e.date ? fd(e.date) : 'Sin fecha'}\n`; if(e.txt) txt += `   ${e.txt}\n`; if(e.photo) txt += `   [foto adjunta]\n`; txt += '\n'; });
+  txt += `${'═'.repeat(46)}\nGenera el informe N°${num}. Adjunto las fotos por separado.`;
+  navigator.clipboard.writeText(txt).then(() => toast('Copiado — pégalo en Claude ✓')).catch(() => {
+    const box = document.getElementById('textout'); box.style.display = 'block'; box.textContent = txt; toast('Copia el texto de abajo');
   });
 }
-function descargar(){
-  const sel=seleccionados();
-  if(!sel.length){toast('No hay registros seleccionados');return;}
-  const data={proyecto:document.getElementById('ex-proj').value,periodo_ini:document.getElementById('ex-ini').value,periodo_fin:document.getElementById('ex-fin').value,responsable:document.getElementById('ex-resp').value,num_informe:document.getElementById('ex-num').value,exportado:new Date().toISOString(),total:sel.length,registros:sel};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;
-  a.download=`bitacora_${data.proyecto.replace(/\s+/g,'_')}_${data.periodo_ini||'export'}.json`;
-  a.click();URL.revokeObjectURL(url);
+function descargar() {
+  const sel = seleccionados();
+  if (!sel.length) { toast('No hay registros seleccionados'); return; }
+  const data = {proyecto: document.getElementById('ex-proj').value, periodo_ini: document.getElementById('ex-ini').value, periodo_fin: document.getElementById('ex-fin').value, responsable: document.getElementById('ex-resp').value, num_informe: document.getElementById('ex-num').value, exportado: new Date().toISOString(), total: sel.length, registros: sel};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `bitacora_${data.proyecto.replace(/\s+/g,'_')}_${data.periodo_ini||'export'}.json`;
+  a.click(); URL.revokeObjectURL(url);
   toast('JSON descargado ✓');
 }
 
-// ── VISTAS ──
-function showView(v){
-  ['cap','feed','projs','export'].forEach(id=>{
-    document.getElementById('view-'+id).classList.toggle('on',id===v);
-    document.getElementById('bn-'+id).classList.toggle('on',id===v);
+// ═══════════════════════════════════════════
+//  VISTAS
+// ═══════════════════════════════════════════
+function showView(v) {
+  ['cap','feed','projs','export'].forEach(id => {
+    document.getElementById('view-'+id).classList.toggle('on', id === v);
+    document.getElementById('bn-'+id).classList.toggle('on', id === v);
   });
-  if(v==='feed')renderFeed();
-  if(v==='projs')renderProjs();
-  if(v==='export')renderExport();
+  if (v === 'feed') renderFeed();
+  if (v === 'projs') renderProjs();
+  if (v === 'export') renderExport();
 }
-function toast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),2300);
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), 2300);
 }
 
-// ── INIT ──
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
 cargar();
 cargarDriveCfg();
-const _authHandled = checkAuthCallback();
-syncSelects();mostrarFecha();mostrarEstadoDrive();
-// Si ya había sesión previa, renovar token silenciosamente al abrir la app
-if(clientId && driveUser){
-  setTimeout(()=>{
-    if(typeof google!=='undefined'){
-      renovarToken();
-      // Intentar sync tras renovación
-      setTimeout(()=>{ if(gToken) syncDrive(); }, 2000);
-    } else {
-      // GIS aún no cargó, esperar
-      window.addEventListener('load', ()=>{ setTimeout(()=>{ renovarToken(); setTimeout(()=>{ if(gToken) syncDrive(); },2000); }, 500); });
-    }
-  }, 800);
+syncSelects();
+mostrarFecha();
+mostrarEstadoDrive();
+
+setInterval(mostrarFecha, 60000);
+
+// Si ya hubo sesión previa, pedir token silencioso al abrir
+if (driveUser) {
+  window.addEventListener('load', () => {
+    setTimeout(() => pedirToken(CLIENT_ID, true), 1000);
+  });
 }
-setInterval(mostrarFecha,60000);
-const hoy=new Date();
-const lun=new Date(hoy);lun.setDate(hoy.getDate()-(hoy.getDay()||7)+1);
-const dom=new Date(lun);dom.setDate(lun.getDate()+6);
-document.getElementById('ex-ini').value=lun.toISOString().split('T')[0];
-document.getElementById('ex-fin').value=dom.toISOString().split('T')[0];
-['ex-ini','ex-fin','ex-proj'].forEach(id=>{
-  document.getElementById(id).addEventListener('change',()=>{
-    if(document.getElementById('view-export').classList.contains('on'))renderExport();
+
+const hoy = new Date();
+const lun = new Date(hoy); lun.setDate(hoy.getDate() - (hoy.getDay() || 7) + 1);
+const dom = new Date(lun); dom.setDate(lun.getDate() + 6);
+document.getElementById('ex-ini').value = lun.toISOString().split('T')[0];
+document.getElementById('ex-fin').value = dom.toISOString().split('T')[0];
+['ex-ini','ex-fin','ex-proj'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    if (document.getElementById('view-export').classList.contains('on')) renderExport();
   });
 });
 </script>
 
 <script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
-  });
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
 }
 </script>
 </body>
