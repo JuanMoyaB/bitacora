@@ -190,7 +190,7 @@ textarea::placeholder{color:var(--hint)}
             <strong>6.</strong> Pega el Client ID aquí abajo
           </p>
         </div>
-        <input type="text" id="client-id-inp" placeholder="Client ID de Google (...apps.googleusercontent.com)" autocomplete="off">
+        <input type="text" id="client-id-inp" placeholder="Client ID de Google (...apps.googleusercontent.com)" value="739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com" autocomplete="off">
         <button class="btn-connect" onclick="guardarClientId()">Conectar con Google Drive</button>
       </div>
 
@@ -311,7 +311,7 @@ let gToken = null, driveFileId = null, driveUser = '', clientId = '';
 let syncTimer = null, pendingSync = false;
 
 function cargarDriveCfg(){
-  try{const cfg=JSON.parse(localStorage.getItem(DRIVE_KEY)||'{}');clientId=cfg.clientId||'';driveFileId=cfg.fileId||null;driveUser=cfg.user||'';}
+  try{const cfg=JSON.parse(localStorage.getItem(DRIVE_KEY)||'{}');clientId=cfg.clientId||'739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleusercontent.com';driveFileId=cfg.fileId||null;driveUser=cfg.user||'';}
   catch(e){}
 }
 function guardarDriveCfg(){
