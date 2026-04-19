@@ -175,7 +175,7 @@ textarea::placeholder{color:var(--hint)}
   <div class="topbar">
     <div>
       <h1>Bitácora AquaTem</h1>
-      <p>Astillero Cheted · Quellón · v2.1</p>
+      <p>Astillero Cheted · Quellón · v2.2</p>
     </div>
     <div class="topbar-right">
       <div class="sync-wrap">
@@ -365,6 +365,8 @@ const CLIENT_ID = '739804842025-t6maa9scled06dqhv2m94mo0783d7tl2.apps.googleuser
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
 
 let entries = [], projects = [], curPhoto = null, feedFiltro = 'all';
+let deletedIds = {};   // {id: timestamp} — lápidas de registros eliminados
+let deletedProjs = {}; // {nombre: timestamp} — lápidas de proyectos eliminados
 let editandoProj = null;
 let editandoEntry = null, editPhoto = null, editPhotoChanged = false;
 let gToken = null, driveFileId = null, driveUser = '';
@@ -378,11 +380,13 @@ function cargar() {
     const d = JSON.parse(localStorage.getItem(KEY) || '{}');
     entries = d.entries || [];
     projects = d.projects || ['Pontón Poseidón 11'];
-  } catch(e) { entries = []; projects = ['Pontón Poseidón 11']; }
+    deletedIds = d.deletedIds || {};       // {id: timestamp_borrado}
+    deletedProjs = d.deletedProjs || {};   // {nombre: timestamp_borrado}
+  } catch(e) { entries = []; projects = ['Pontón Poseidón 11']; deletedIds = {}; deletedProjs = {}; }
 }
 
 function persistir() {
-  localStorage.setItem(KEY, JSON.stringify({entries, projects}));
+  localStorage.setItem(KEY, JSON.stringify({entries, projects, deletedIds, deletedProjs}));
   document.getElementById('tb-cnt').textContent = entries.length + ' registro' + (entries.length !== 1 ? 's' : '');
   scheduleSync();
 }
@@ -505,12 +509,15 @@ async function syncDrive() {
   setSyncStatus('Sincronizando…', true);
   try {
     if (!driveFileId) driveFileId = await buscarArchivo();
-    const local = {entries, projects, version: Date.now()};
+    const local = {entries, projects, deletedIds, deletedProjs, version: Date.now()};
     if (driveFileId) {
       const remoto = await leerArchivo(driveFileId);
       const merged = merge(local, remoto);
-      entries = merged.entries; projects = merged.projects;
-      localStorage.setItem(KEY, JSON.stringify({entries, projects}));
+      entries = merged.entries;
+      projects = merged.projects;
+      deletedIds = merged.deletedIds;
+      deletedProjs = merged.deletedProjs;
+      localStorage.setItem(KEY, JSON.stringify({entries, projects, deletedIds, deletedProjs}));
       syncSelects();
       if (document.getElementById('view-feed').classList.contains('on')) renderFeed();
       if (document.getElementById('view-projs').classList.contains('on')) renderProjs();
@@ -542,12 +549,36 @@ async function syncDrive() {
 }
 
 function merge(local, drive) {
+  // Combinar lápidas (la más antigua entre local y nube; en realidad cualquiera sirve, pero conservamos la más antigua)
+  const dIds = {...(drive.deletedIds||{})};
+  Object.entries(local.deletedIds||{}).forEach(([id, ts]) => {
+    if (!dIds[id] || ts < dIds[id]) dIds[id] = ts;
+  });
+  const dProjs = {...(drive.deletedProjs||{})};
+  Object.entries(local.deletedProjs||{}).forEach(([n, ts]) => {
+    if (!dProjs[n] || ts < dProjs[n]) dProjs[n] = ts;
+  });
+
+  // Combinar entries — pero descartar todo lo que esté en lápidas
   const all = [...(local.entries||[]), ...(drive.entries||[])];
   const byId = {};
-  all.forEach(e => { if (!byId[e.id]) byId[e.id] = e; });
-  const entries = Object.values(byId).sort((a,b) => b.id - a.id);
+  all.forEach(e => {
+    if (dIds[e.id]) return;            // eliminado: no resucitar
+    if (!byId[e.id]) byId[e.id] = e;   // primer ocurrencia gana (local viene primero)
+  });
+  const mergedEntries = Object.values(byId).sort((a,b) => b.id - a.id);
+
+  // Combinar proyectos descartando los eliminados
   const projSet = new Set([...(local.projects||[]), ...(drive.projects||[])]);
-  return {entries, projects: Array.from(projSet), version: Math.max(local.version||0, drive.version||0)};
+  dProjs && Object.keys(dProjs).forEach(n => projSet.delete(n));
+
+  return {
+    entries: mergedEntries,
+    projects: Array.from(projSet),
+    deletedIds: dIds,
+    deletedProjs: dProjs,
+    version: Math.max(local.version||0, drive.version||0)
+  };
 }
 
 async function buscarArchivo() {
@@ -680,6 +711,11 @@ function eliminarProj(nombre) {
   const cnt = entries.filter(e => e.proj === nombre).length;
   const msg = cnt > 0 ? `¿Eliminar "${nombre}"? Tiene ${cnt} registro${cnt!==1?'s':''} que también se eliminarán.` : `¿Eliminar "${nombre}"?`;
   if (!confirm(msg)) return;
+  const ts = Date.now();
+  // Lápidas para todos los registros del proyecto
+  entries.filter(e => e.proj === nombre).forEach(e => { deletedIds[e.id] = ts; });
+  // Lápida del proyecto
+  deletedProjs[nombre] = ts;
   projects = projects.filter(p => p !== nombre);
   entries = entries.filter(e => e.proj !== nombre);
   persistir(); syncSelects(); renderProjs();
@@ -766,6 +802,7 @@ function renderFeed() {
 function setFiltro(p) { feedFiltro = p; renderFeed(); }
 function eliminarEntry(id) {
   if (!confirm('¿Eliminar este registro?')) return;
+  deletedIds[id] = Date.now();
   entries = entries.filter(e => e.id !== id);
   persistir(); renderFeed();
 }
